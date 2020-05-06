@@ -1,0 +1,12 @@
+.today-bg {
+    color: rgb(48, 124, 247);
+}
+
+.weekend-bg {
+    background-color: lightgray;
+}
+
+.card {
+    margin-top: 10px;
+    padding: 10px;
+}

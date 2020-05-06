@@ -1,0 +1,26 @@
+{
+  "name": "calendar-part-1-hdelafuente",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/software-verificable-202010/calendar-part-1-hdelafuente.git"
+  },
+  "author": "Hugo de la Fuente",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/software-verificable-202010/calendar-part-1-hdelafuente/issues"
+  },
+  "homepage": "https://github.com/software-verificable-202010/calendar-part-1-hdelafuente#readme",
+  "dependencies": {
+    "electron": "^8.2.0",
+    "js-datepicker": "^5.11.0",
+    "moment": "^2.25.3",
+    "mysql": "^2.18.1",
+    "webpack": "4.36.0"
+  }
+}
