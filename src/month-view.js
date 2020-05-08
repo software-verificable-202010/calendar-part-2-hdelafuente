@@ -1,19 +1,22 @@
-const api = require("./api/api");
 const electron = require("electron");
+var mysql = require("mysql");
+var moment = require("moment");
 /*
-* Global variables
+* Constants for this component
 */
 const { ipcRenderer } = electron;
+const pathToWeekView = "src/views/week-view.html";
 
-
-let db = api.db;
 let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
-let currentMonthEvents = api.getMonthEvents(db, currentMonth);
 
-let weekViewButton = document.querySelector("#week-view-btn");
-//weekViewButton.addEventListener("click", showWeekView());
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "password",
+    database: "calendar",
+});
 
 let months = [
     "Jan",
@@ -33,23 +36,21 @@ let months = [
 let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 let monthAndYear = document.getElementById("monthAndYear");
-showCalendar(currentMonth, currentYear);
 
 let januaryNumber = 0;
 let decemberNumber = 11; // Would be 12 but count start at 0
 
-
 /*
 * Navigation Functions
 */
-function goToNextMonth() {
+function getNextMonth() {
     currentYear =
         currentMonth === decemberNumber ? currentYear + 1 : currentYear;
     currentMonth = (currentMonth + 1) % (decemberNumber + 1);
     showCalendar(currentMonth, currentYear);
 }
 
-function goToPreviousMonth() {
+function getPreviousMonth() {
     currentYear =
         currentMonth === januaryNumber ? currentYear - 1 : currentYear;
     currentMonth =
@@ -61,12 +62,6 @@ function addWeekendBackground(domElement, dayIterator) {
     if (dayIterator % 7 === 0 || dayIterator % 6 === 0) {
         domElement.classList.add("weekend-bg");
     }
-}
-
-function addEventsInCell(dayNumber, eventArray) {
-    eventArray.forEach(event => {
-        console.log(event);
-    });
 }
 
 /*
@@ -124,8 +119,11 @@ function showCalendar(month, year) {
                 break;
             } else {
                 let dayNumber = document.createTextNode(date.toString());
+                let monthNumber = currentMonth < 10 ? "0" + (currentMonth + 1) : currentMonth;
+                let dayNumberString = (date < 10 ? ("0" + date) : (date));
+                let dayCellId = currentYear + "-" + monthNumber + "-" + dayNumberString;
+                dayCell.setAttribute('id', dayCellId);
                 addWeekendBackground(dayCell, j);
-                addEventsInCell(date, currentMonthEvents);
                 if (
                     date === today.getDate() &&
                     year === today.getFullYear() &&
@@ -140,6 +138,44 @@ function showCalendar(month, year) {
         }
         calendarTableBody.appendChild(weekRow);
     }
+    insertEventInCell(db, currentMonth);
+
+}
+/*
+ * Event insertion, creation
+ */
+function insertEventInCell(db, monthNumber) {
+    db.connect();
+    let querySentence = `select * from events where month(date) = ` + (monthNumber + 1);
+    db.query(querySentence, (err, results) => {
+        console.log(results);
+        if (err) throw err;
+        results.map((event) => {
+            let formattedDate = moment(event.date).format("YYYY-MM-DD").toString();
+            let dayCell = document.getElementById(formattedDate);
+            let spanElement = document.createElement("span");
+            spanElement.classList.add("badge");
+            spanElement.classList.add("badge-pill");
+            spanElement.classList.add("badge-dark");
+            spanElement.innerHTML = "1"; // Generic text
+            dayCell.appendChild(spanElement);
+        });
+    });
+};
+
+function createEvent(db, event) {
+    db.connect();
+    let querySentence = `insert into events (title, description, date, start_time, end_time) values ('` +
+        event.title + `','` +
+        event.description + `','` +
+        event.date + `','` +
+        event.start_time + `','` +
+        event.end_time + `')`;
+    console.log(querySentence);
+    db.query(querySentence, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    });
 }
 
 /*
@@ -150,12 +186,29 @@ ipcRenderer.on("event:add", function (e, event) {
         let alertDiv = document.querySelector("#alert-div");
         alertDiv.innerHTML = event.error;
     } else {
-        api.createEvent(db, event);
-        currentMonthEvents = api.getMonthEvents(db, currentMonth);
+        createEvent(db, event);
+        showCalendar(currentMonth, currentYear);
     }
 })
 
-// Navigate to week view
-function showWeekView() {
-    ipcRenderer.send("view:week", { path: "src/views/week-view.html" })
+
+let weekViewButton = document.querySelector("#week-view-btn");
+weekViewButton.addEventListener("click", () => {
+    goToView(pathToWeekView);
+})
+// App event in which the week view is shown
+function goToView(path) {
+    ipcRenderer.send("view:week", {
+        path: path,
+        today: today,
+        currentMonth: currentMonth,
+        currentYear: currentYear
+    });
 }
+
+
+let nextMonthButton = document.querySelector("#next-btn");
+nextMonthButton.addEventListener("click", () => { getNextMonth() });
+let prevMonthButton = document.querySelector("#prev-btn");
+prevMonthButton.addEventListener("click", () => { getPreviousMonth() });
+showCalendar(currentMonth, currentYear);

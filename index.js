@@ -1,7 +1,29 @@
 const electron = require("electron");
 const url = require("url");
 const path = require("path");
-const api = require("./src/api/api");
+const mysql = require("mysql");
+
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "password",
+    database: "calendar",
+});
+
+db.connect((err) => {
+    if (err) throw err;
+    db.query("CREATE SCHEMA IF NOT EXISTS calendar", (err, result) => {
+        if (err) throw err;
+        console.log("Database created!")
+        console.log(result);
+    })
+    db.query("CREATE TABLE IF NOT EXISTS events (title varchar(200), description varchar(300), date date, start_time time, end_time time)", (err, result) => {
+        if (err) throw err
+        console.log("Table created");
+        console.log(result)
+    })
+
+})
 
 const { app, BrowserWindow, Menu, ipcMain } = electron;
 
@@ -11,13 +33,12 @@ let addEventWindow;
 // SET ENV
 process.env.NODE_ENV = "development";
 
-
 // Liten for app to be ready
 app.on("ready", createWindow);
 function createWindow() {
     // Create window
     mainWindow = new BrowserWindow({
-        width: 1000, height: 600, title: "Calendar", webPreferences: {
+        width: 1200, height: 600, title: "Calendar", webPreferences: {
             nodeIntegration: true
         }
     });
@@ -76,10 +97,11 @@ ipcMain.on("event:add", function (e, event) {
 
 ipcMain.on("view:week", function (e, message) {
     console.log(message);
+    mainWindow.close();
     mainWindow = null;
 
     mainWindow = new BrowserWindow({
-        width: 1000, height: 600, title: "Calendar", webPreferences: {
+        width: 1100, height: 600, title: "Calendar", webPreferences: {
             nodeIntegration: true
         }
     });
@@ -115,7 +137,6 @@ const mainMenuTemplate = [
                 accelerator:
                     process.platform == "darwin" ? "Command+Q" : "Ctrl+Q",
                 click() {
-                    api.db.end();
                     app.quit();
                 },
             },
@@ -157,7 +178,6 @@ app.on("window-all-closed", function () {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== "darwin") {
-        api.db.end();
         app.quit();
     }
 });

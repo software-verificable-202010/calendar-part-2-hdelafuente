@@ -21,8 +21,39 @@
     </head>
     <body>
         <div class="container flex">
+            <div class="container">Use ctrl(cmd)+e to add event</div>
             <div class="card">
-                vista semanal
+                <div class="form-inline">
+                    <button
+                        class="btn btn-outline-primary btn-sm"
+                        id="previous-week"
+                    >
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary btn-sm"
+                        id="next-week"
+                    >
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                    <hr />
+                    <button
+                        class="btn btn-outline-secondary btn-sm"
+                        id="month-view-btn"
+                    >
+                        Week View
+                    </button>
+                </div>
+                <h3 class="card-header" id="monthAndYear"></h3>
+                <table
+                    class="table table-bordered table-responsive-sm"
+                    id="week-table"
+                >
+                    <thead id="week-table-head"></thead>
+
+                    <tbody id="week-table-body"></tbody>
+                </table>
             </div>
         </div>
 

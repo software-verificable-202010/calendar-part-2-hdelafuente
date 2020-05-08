@@ -22,20 +22,19 @@
     <body>
         <div class="container flex">
             <div class="container" id="alert-div"></div>
+            <div class="container">Use ctrl(cmd)+e to add event</div>
             <div class="card">
                 <div class="form-inline">
                     <button
                         class="btn btn-outline-primary btn-sm"
-                        id="previous"
-                        onclick="goToPreviousMonth()"
+                        id="prev-btn"
                     >
                         <i class="fas fa-angle-left"></i>
                     </button>
 
                     <button
                         class="btn btn-outline-primary btn-sm"
-                        id="next"
-                        onclick="goToNextMonth()"
+                        id="next-btn"
                     >
                         <i class="fas fa-angle-right"></i>
                     </button>
@@ -43,7 +42,6 @@
                     <button
                         class="btn btn-outline-secondary btn-sm"
                         id="week-view-btn"
-                        onclick="showWeekView()"
                     >
                         Week View
                     </button>
