@@ -1,21 +1,8 @@
 const electron = require("electron");
-var mysql = require("mysql");
+// var mysql = require("mysql");
 var moment = require("moment");
-
-/*
-* Constants for this component
-*/
 const { ipcRenderer } = electron;
 const pathToMonthView = "src/views/month-view.html";
-
-let db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "password",
-    database: "calendar",
-});
-
-
 let today = moment();
 let currentMonth = today.format("MM");
 let currentYear = today.format("YYYY");
@@ -23,8 +10,6 @@ let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 let daysNames = ["Hour", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 let oneAM = 1;
 let elevenPM = 24;
-let sundayNumber = 0;
-let saturdayNumber = 6;
 let hourRange = hourRangeConstructor(oneAM, elevenPM);
 let dateRange = dateRangeConstructor(today);
 
@@ -113,7 +98,6 @@ function hourRangeConstructor(lower, upper) {
 function dateRangeConstructor(today) {
     let week = [];
 
-    let mondayDistance = parseInt(today.format("d"));
     let monday = today.startOf('week');
     week.push(monday.format("YYYY-MM-DD"));
 
@@ -135,37 +119,12 @@ function goToPreviousWeek() {
     showWeek();
 }
 
-/*
- * Fill  clanedar with events
- * TODO: Adjust start of the week, for some reason momentjs gets crazy with navigation
- * TODO: Adjust superposition
- */
-
-function insertEventInCell(db, monthNumber) {
-    db.connect();
-    let querySentence = `select * from events where month(date) = ` + (monthNumber + 1);
-    db.query(querySentence, (err, results) => {
-        console.log(results);
-        if (err) throw err;
-        results.map((event) => {
-            let formattedDate = moment(event.date).format("YYYY-MM-DD").toString();
-            let dayCell = document.getElementById(formattedDate);
-            let spanElement = document.createElement("span");
-            spanElement.classList.add("badge");
-            spanElement.classList.add("badge-pill");
-            spanElement.classList.add("badge-dark");
-            spanElement.innerHTML = "1"; // Generic text
-            dayCell.appendChild(spanElement);
-        });
-    });
-};
-
 
 /*
  * Events from ipcRenderer
 */
 ipcRenderer.on("view:week", function (e, props) {
-    today = porps.today;
+    today = props.today;
     currentMonth = props.currentMonth;
     currentYear = props.currentYear;
     console.log(today, currentMonth, currentYear);
@@ -176,6 +135,7 @@ let monthViewButton = document.querySelector("#month-view-btn");
 monthViewButton.addEventListener("click", () => {
     goToView(pathToMonthView);
 })
+
 // App event in which the week view is shown
 function goToView(path) {
     ipcRenderer.send("view:week", {

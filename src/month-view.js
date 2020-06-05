@@ -1,15 +1,50 @@
+/* eslint-disable init-declarations */
 const electron = require("electron");
 var mysql = require("mysql");
 var moment = require("moment");
+var api = require("./db/db");
 /*
 * Constants for this component
 */
 const { ipcRenderer } = electron;
 const pathToWeekView = "src/views/week-view.html";
 
+let user;
 let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
+
+/*
+ * Events from ipcRenderer
+*/
+ipcRenderer.on("event:add", (e, event) => {
+    if (event.error) {
+        let alertDiv = document.querySelector("#alert-div");
+        alertDiv.innerHTML = event.error;
+    } else {
+        createEvent(db, event);
+        showCalendar(currentMonth, currentYear);
+    }
+})
+
+// App event in which the week view is shown
+function goToView(path) {
+    ipcRenderer.send("view:week", {
+        path: path,
+        today: today,
+        currentMonth: currentMonth,
+        currentYear: currentYear
+    });
+}
+
+let weekViewButton = document.querySelector("#week-view-btn");
+weekViewButton.addEventListener("click", () => {
+    goToView(pathToWeekView);
+})
+
+ipcRenderer.invoke("user:get-props").then((response) => {
+    user = response;
+})
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -38,7 +73,7 @@ let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 let monthAndYear = document.getElementById("monthAndYear");
 
 let januaryNumber = 0;
-let decemberNumber = 11; // Would be 12 but count start at 0
+let decemberNumber = 11;
 
 /*
 * Navigation Functions
@@ -64,21 +99,8 @@ function addWeekendBackground(domElement, dayIterator) {
     }
 }
 
-/*
-* Calendar month view constructor
-*/
-function showCalendar(month, year) {
-    let firstDay = new Date(year, month).getDay();
-    let maxDayAmount = 32;
-    let daysInMonth = maxDayAmount - new Date(year, month, maxDayAmount).getDate();
-
-    /*
-    * Insert week day short name into the header
-    * of the table conatining the calendar
-    */
-    let calendarTableHead = document.getElementById("calendar-head");
+function fillCalendarTableHead(calendarTableHead) {
     calendarTableHead.innerHTML = ""; // clear the head for month navigation
-
     let weekDaysRowElement = document.createElement("tr");
 
     for (let day = 0; day < daysShortNames.length; day++) {
@@ -92,12 +114,12 @@ function showCalendar(month, year) {
     }
 
     calendarTableHead.appendChild(weekDaysRowElement);
+}
 
-    /*
-    * Insert day number into de table body
-    */
-    let calendarTableBody = document.getElementById("calendar-body");
-
+function fillCalendarTableBody(calendarTableBody, month, year) {
+    let firstDay = new Date(year, month).getDay() === 0 ? 7 : new Date(year, month).getDay();
+    let maxDayAmount = 32;
+    let daysInMonth = maxDayAmount - new Date(year, month, maxDayAmount).getDate();
     calendarTableBody.innerHTML = ""; // clear the table for month navigation
 
     monthAndYear.innerHTML = months[month] + " " + year;
@@ -119,9 +141,8 @@ function showCalendar(month, year) {
                 break;
             } else {
                 let dayNumber = document.createTextNode(date.toString());
-                let monthNumber = currentMonth < 10 ? "0" + (currentMonth + 1) : currentMonth;
-                let dayNumberString = (date < 10 ? ("0" + date) : (date));
-                let dayCellId = currentYear + "-" + monthNumber + "-" + dayNumberString;
+
+                let dayCellId = moment(new Date(currentYear, currentMonth, date)).format("YYYY-MM-DD");
                 dayCell.setAttribute('id', dayCellId);
                 addWeekendBackground(dayCell, j);
                 if (
@@ -138,17 +159,33 @@ function showCalendar(month, year) {
         }
         calendarTableBody.appendChild(weekRow);
     }
-    insertEventInCell(db, currentMonth);
+}
+
+
+function showCalendar(month, year) {
+    /*
+    * Insert week day short name into the header
+    * of the table conatining the calendar
+    */
+    let calendarTableHead = document.getElementById("calendar-head");
+    fillCalendarTableHead(calendarTableHead);
+
+    let calendarTableBody = document.getElementById("calendar-body");
+    fillCalendarTableBody(calendarTableBody, month, year);
+    console.log("user: ", user);
+    insertEventInCell(db, currentMonth, 1);
 
 }
 /*
  * Event insertion, creation
  */
-function insertEventInCell(db, monthNumber) {
+function showEventDetails(event_id) {
+    console.log(event_id);
+}
+function insertEventInCell(db, monthNumber, user_id) {
     db.connect();
-    let querySentence = `select * from events where month(date) = ` + (monthNumber + 1);
+    let querySentence = `select * from events where month(date)=${monthNumber + 1} and user_id=${user_id}`;
     db.query(querySentence, (err, results) => {
-        console.log(results);
         if (err) throw err;
         results.map((event) => {
             let formattedDate = moment(event.date).format("YYYY-MM-DD").toString();
@@ -157,55 +194,18 @@ function insertEventInCell(db, monthNumber) {
             spanElement.classList.add("badge");
             spanElement.classList.add("badge-pill");
             spanElement.classList.add("badge-dark");
-            spanElement.innerHTML = "1"; // Generic text
+            spanElement.addEventListener("click", () => { showEventDetails(event) });
+            spanElement.innerHTML = "!";
             dayCell.appendChild(spanElement);
         });
     });
-};
+}
 
 function createEvent(db, event) {
-    db.connect();
-    let querySentence = `insert into events (title, description, date, start_time, end_time) values ('` +
-        event.title + `','` +
-        event.description + `','` +
-        event.date + `','` +
-        event.start_time + `','` +
-        event.end_time + `')`;
-    console.log(querySentence);
-    db.query(querySentence, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    });
+    let response = api.createEvent(db, event);
+    console.log(response);
+    return response;
 }
-
-/*
- * Events from ipcRenderer
-*/
-ipcRenderer.on("event:add", function (e, event) {
-    if (event.error) {
-        let alertDiv = document.querySelector("#alert-div");
-        alertDiv.innerHTML = event.error;
-    } else {
-        createEvent(db, event);
-        showCalendar(currentMonth, currentYear);
-    }
-})
-
-
-let weekViewButton = document.querySelector("#week-view-btn");
-weekViewButton.addEventListener("click", () => {
-    goToView(pathToWeekView);
-})
-// App event in which the week view is shown
-function goToView(path) {
-    ipcRenderer.send("view:week", {
-        path: path,
-        today: today,
-        currentMonth: currentMonth,
-        currentYear: currentYear
-    });
-}
-
 
 let nextMonthButton = document.querySelector("#next-btn");
 nextMonthButton.addEventListener("click", () => { getNextMonth() });

@@ -1,3 +1,6 @@
+/* eslint-disable init-declarations */
+/* eslint-disable no-process-env */
+/* eslint-disable no-undef */
 const electron = require("electron");
 const url = require("url");
 const path = require("path");
@@ -10,47 +13,73 @@ let db = mysql.createConnection({
     database: "calendar",
 });
 
+let user;
+let mainWindow;
+let mainMenu;
+let addEventWindow;
+
 db.connect((err) => {
-    if (err) throw err;
-    db.query("CREATE SCHEMA IF NOT EXISTS calendar", (err, result) => {
-        if (err) throw err;
-        console.log("Database created!")
-        console.log(result);
-    })
-    db.query("CREATE TABLE IF NOT EXISTS events (title varchar(200), description varchar(300), date date, start_time time, end_time time)", (err, result) => {
-        if (err) throw err
-        console.log("Table created");
-        console.log(result)
-    })
+    if (!err) {
+        console.log(err);
+        db.query("CREATE DATABASE IF NOT EXISTS calendar", (err, result) => {
+            if (err) throw err;
+            console.log("Database created!")
+            console.log(result);
+        })
+        let createUserTable = `create table if not exists users (\
+        id int not null auto_increment,\
+        username varchar(100),\
+        name varchar(100),
+        primary key (id))`
+        db.query(createUserTable, (err, result) => {
+            if (err) throw err;
+            console.log("Users table created!");
+            console.log(result);
+        })
+        let createEventTable = `create table if not exists events(
+            id int not null auto_increment, 
+            title varchar(100), 
+            description varchar(200), 
+            date date, 
+            start_time time, 
+            end_time time, 
+            user_id int not null, 
+            primary key (id), 
+            constraint user_id 
+                foreign key (user_id) 
+                references users(id) 
+                on delete cascade
+            )`
+        db.query(createEventTable, (err, result) => {
+            if (err) throw err
+            console.log("Event table created");
+            console.log(result)
+        })
+    }
 
 })
 
-const { app, BrowserWindow, Menu, ipcMain } = electron;
+const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = electron;
 
-let mainWindow;
-let addEventWindow;
-
-// SET ENV
 process.env.NODE_ENV = "development";
 
-// Liten for app to be ready
 app.on("ready", createWindow);
 function createWindow() {
-    // Create window
+
     mainWindow = new BrowserWindow({
-        width: 1200, height: 600, title: "Calendar", webPreferences: {
+        width: 1200,
+        height: 600,
+        title: "Calendar",
+        webPreferences: {
             nodeIntegration: true
         }
     });
 
-    // Load html
-    mainWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, "src/views/month-view.html"),
-            protocol: "file:",
-            slashes: true,
-        })
-    );
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, "src/views/login.html"),
+        protocol: "file:",
+        slashes: true,
+    }));
 
     mainWindow.on("closed", function () {
         // Dereference the window object, usually you would store windows
@@ -59,60 +88,87 @@ function createWindow() {
         mainWindow = null;
     });
 
-    // Main menu
-    const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+    mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
 
     Menu.setApplicationMenu(mainMenu);
 }
 
-// Handle create event window
+
 function createAddEventWindow() {
     addEventWindow = new BrowserWindow({
-        width: 500, height: 500, title: "Add Event", webPreferences: {
+        width: 500,
+        height: 600,
+        title: "Add Event",
+        webPreferences: {
             nodeIntegration: true
         }
     });
 
-    // Load html
-    addEventWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, "src/views/add-event.html"),
-            protocol: "file:",
-            slashes: true,
-        })
-    );
-    // Close the new window when event is added
+
+    addEventWindow.loadURL(url.format({
+        pathname: path.join(__dirname, "src/views/add-event.html"),
+        protocol: "file:",
+        slashes: true,
+    }));
+
     addEventWindow.on('close', function () {
         addEventWindow = null;
     })
 
 }
 
-// Catch events from ipcMain
-ipcMain.on("event:add", function (e, event) {
+// IPC Event Listener
+ipcMain.on("event:login", (e, props) => {
+    console.log("props: ", props);
+    mainWindow.close();
+    user = props.user;
+
+    mainWindow = new BrowserWindow({
+        width: 1200,
+        height: 600,
+        title: "Calendar",
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, props.path),
+        protocol: "file:",
+        slashes: true,
+    }));
+
+})
+
+ipcMain.handle("user:get-props", async () => {
+    let userObject = await user;
+    return userObject;
+})
+
+ipcMain.on("event:add", (e, event) => {
     console.log(event);
     mainWindow.webContents.send("event:add", event);
     addEventWindow.close();
 })
 
-ipcMain.on("view:week", function (e, message) {
+ipcMain.on("view:week", (e, message) => {
     console.log(message);
     mainWindow.close();
-    mainWindow = null;
 
     mainWindow = new BrowserWindow({
-        width: 1100, height: 600, title: "Calendar", webPreferences: {
+        width: 1200,
+        height: 600,
+        title: "Calendar",
+        webPreferences: {
             nodeIntegration: true
         }
     });
 
-    mainWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, message.path),
-            protocol: "file:",
-            slashes: true,
-        })
-    );
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, message.path),
+        protocol: "file:",
+        slashes: true,
+    }));
 
 })
 
@@ -127,7 +183,7 @@ const mainMenuTemplate = [
             {
                 label: "Add Event",
                 accelerator:
-                    process.platform == "darwin" ? "Command+E" : "Ctrl+E",
+                    process.platform === "darwin" ? "Command+E" : "Ctrl+E",
                 click() {
                     createAddEventWindow();
                 }
@@ -135,7 +191,7 @@ const mainMenuTemplate = [
             {
                 label: "Quit",
                 accelerator:
-                    process.platform == "darwin" ? "Command+Q" : "Ctrl+Q",
+                    process.platform === "darwin" ? "Command+Q" : "Ctrl+Q",
                 click() {
                     app.quit();
                 },
@@ -148,7 +204,7 @@ const mainMenuTemplate = [
             {
                 label: "Reload",
                 accelerator:
-                    process.platform == "darwin" ? "Command+R" : "Ctrl+R",
+                    process.platform === "darwin" ? "Command+R" : "Ctrl+R",
                 click() {
                     mainWindow.reload();
                 },
@@ -157,7 +213,7 @@ const mainMenuTemplate = [
     },
 ];
 
-// Add developer tools option if in dev
+
 if (process.env.NODE_ENV !== "production") {
     mainMenuTemplate.push({
         label: "Developer Tools",
@@ -165,7 +221,7 @@ if (process.env.NODE_ENV !== "production") {
             {
                 label: "Toggle DevTools",
                 accelerator:
-                    process.platform == "darwin" ? "Command+I" : "Ctrl+I",
+                    process.platform === "darwin" ? "Command+I" : "Ctrl+I",
                 click() {
                     mainWindow.toggleDevTools();
                 },

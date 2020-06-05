@@ -1,7 +1,9 @@
 const electron = require("electron");
 const datepicker = require("js-datepicker");
 const moment = require("moment");
+// eslint-disable-next-line no-unused-vars
 const picker = datepicker("#datepicker");
+
 
 const { ipcRenderer } = electron;
 
