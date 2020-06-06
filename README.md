@@ -8,6 +8,8 @@ Para instalar las dependencias:
 
 Para compilar y correr la app:
 `yarn start`
+# Estandar de código
+El estandar de codigo utilizado en esta app viene definido con sus reglas en el archivo `.eslintrc.js` 
 
 # Pendientes
 * Week-view
