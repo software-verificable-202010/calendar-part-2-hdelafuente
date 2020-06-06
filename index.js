@@ -59,7 +59,7 @@ db.connect((err) => {
 
 })
 
-const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = electron;
+const { app, BrowserWindow, Menu, ipcMain } = electron;
 
 process.env.NODE_ENV = "development";
 

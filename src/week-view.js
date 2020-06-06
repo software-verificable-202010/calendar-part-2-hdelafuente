@@ -1,17 +1,18 @@
+/* eslint-disable no-param-reassign */
 const electron = require("electron");
-// var mysql = require("mysql");
-var moment = require("moment");
+const moment = require("moment");
 const { ipcRenderer } = electron;
 const pathToMonthView = "src/views/month-view.html";
-let today = moment();
-let currentMonth = today.format("MM");
+const monthStringWidth = 2
+let today = moment(new Date());
+let currentMonth = pad(parseInt(today.format("MM")) + 1, monthStringWidth, '0');
 let currentYear = today.format("YYYY");
 let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 let daysNames = ["Hour", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 let oneAM = 1;
 let elevenPM = 24;
-let hourRange = hourRangeConstructor(oneAM, elevenPM);
-let dateRange = dateRangeConstructor(today);
+let hourRange = hourRangeContructor(oneAM, elevenPM);
+let dateRange = dateRangeConstructor(today, currentMonth, currentYear);
 
 showWeek();
 
@@ -46,14 +47,13 @@ function cleanHaderInnerHtml(monthAndYear, tableHead, tableBody) {
 }
 
 function fillTableHead(weekTableHead, dateRange) {
-    console.log(dateRange);
     let weekDaysRowElement = document.createElement("tr");
     daysNames.map((day, i) => {
         const insertHeaderElement = document.createElement("th");
         const dayNameText = document.createTextNode(day);
         insertHeaderElement.appendChild(dayNameText);
         if (day !== "Hour") {
-            const dayDateText = document.createTextNode("(" + dateRange[i - 1] + ")");
+            const dayDateText = document.createTextNode(dateRange[i - 1]);
             const lineBreak = document.createElement("br");
             insertHeaderElement.appendChild(lineBreak);
             insertHeaderElement.appendChild(dayDateText);
@@ -77,6 +77,7 @@ function fillTableBody(weekTableBody) {
         tableRowElement.appendChild(hourColumn);
         daysShortNames.map((day) => {
             const temporalElement = document.createElement("td");
+            // TODO: Add element id using dateRange and hourText
             if (day === "Sun" || day === "Sat") {
                 temporalElement.classList.add("weekend-bg");
             }
@@ -87,7 +88,23 @@ function fillTableBody(weekTableBody) {
     });
 }
 
-function hourRangeConstructor(lower, upper) {
+function goToNextWeek() {
+    today = moment(new Date(today.add(7, 'days')));
+    console.log(today);
+    dateRange = dateRangeConstructor(today);
+    console.log(dateRange);
+    showWeek();
+}
+
+function goToPreviousWeek() {
+    today = moment(new Date(today.subtract(7, 'days')));
+    console.log(today);
+    dateRange = dateRangeConstructor(today);
+    console.log(dateRange);
+    showWeek();
+}
+
+function hourRangeContructor(lower, upper) {
     let range = [];
     for (let i = lower; i < upper; i++) {
         range.push(i);
@@ -97,26 +114,19 @@ function hourRangeConstructor(lower, upper) {
 
 function dateRangeConstructor(today) {
     let week = [];
-
-    let monday = today.startOf('week');
+    let monday = today.isoWeekday("Monday");
     week.push(monday.format("YYYY-MM-DD"));
-
     for (let i = 1; i < 7; i++) {
-        week.push(monday.add(i, 'days').format("YYYY-MM-DD"));
+        const dateString = monday.add(1, "days");
+        week.push(dateString.format("YYYY-MM-DD"));
     }
     return week;
 }
 
-function goToNextWeek() {
-    today = new Date(today.add(7, 'days').format("YYYY-MM-DD"));
-    dateRange = dateRangeConstructor(today);
-    showWeek();
-}
-
-function goToPreviousWeek() {
-    today = new Date(today.subtract(7, 'days').format("YYYY-MM-DD"));
-    dateRange = dateRangeConstructor(today);
-    showWeek();
+function pad(n, width, z) {
+    z = z || '0';
+    n = String(n);
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
 
@@ -128,7 +138,6 @@ ipcRenderer.on("view:week", function (e, props) {
     currentMonth = props.currentMonth;
     currentYear = props.currentYear;
     console.log(today, currentMonth, currentYear);
-
 })
 
 let monthViewButton = document.querySelector("#month-view-btn");

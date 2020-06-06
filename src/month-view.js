@@ -8,8 +8,6 @@ var api = require("./db/db");
 */
 const { ipcRenderer } = electron;
 const pathToWeekView = "src/views/week-view.html";
-
-let user;
 let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
@@ -40,10 +38,6 @@ function goToView(path) {
 let weekViewButton = document.querySelector("#week-view-btn");
 weekViewButton.addEventListener("click", () => {
     goToView(pathToWeekView);
-})
-
-ipcRenderer.invoke("user:get-props").then((response) => {
-    user = response;
 })
 
 let db = mysql.createConnection({
@@ -121,12 +115,9 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
     let maxDayAmount = 32;
     let daysInMonth = maxDayAmount - new Date(year, month, maxDayAmount).getDate();
     calendarTableBody.innerHTML = ""; // clear the table for month navigation
-
     monthAndYear.innerHTML = months[month] + " " + year;
-
     let maxColumnsNumber = 8;
     let maxRowsNumber = 7;
-
     let date = 1;
     for (let i = 0; i < maxRowsNumber; i++) {
         let weekRow = document.createElement("tr");
@@ -141,7 +132,6 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
                 break;
             } else {
                 let dayNumber = document.createTextNode(date.toString());
-
                 let dayCellId = moment(new Date(currentYear, currentMonth, date)).format("YYYY-MM-DD");
                 dayCell.setAttribute('id', dayCellId);
                 addWeekendBackground(dayCell, j);
@@ -172,16 +162,32 @@ function showCalendar(month, year) {
 
     let calendarTableBody = document.getElementById("calendar-body");
     fillCalendarTableBody(calendarTableBody, month, year);
-    console.log("user: ", user);
-    insertEventInCell(db, currentMonth, 1);
-
 }
 /*
- * Event insertion, creation
+ * Event insertion, creation, selection
  */
-function showEventDetails(event_id) {
-    console.log(event_id);
+function showEventDetails(event) {
+    let containerElement = document.getElementById("event-details-container");
+    containerElement.removeAttribute("hidden");
+    let eventDetailsHeader = document.getElementById("event-details-header");
+    eventDetailsHeader.innerHTML = "";
+    eventDetailsHeader.appendChild(document.createTextNode(moment(event.date).format("YYYY-MM-DD")));
+    let eventDetailsTitle = document.getElementById("event-details-title");
+    eventDetailsTitle.innerHTML = "";
+    eventDetailsTitle.appendChild(document.createTextNode(event.title));
+    let eventDetailsText = document.getElementById("event-details-text");
+    eventDetailsText.innerHTML = "";
+    eventDetailsText.appendChild(document.createTextNode(event.description));
+    let eventDetailsFooter = document.getElementById("event-details-footer");
+    eventDetailsFooter.innerHTML = "";
+    eventDetailsFooter.appendChild(document.createTextNode(event.start_time + " - " + event.end_time));
 }
+
+function closeEventDetails() {
+    let eventDetailsCard = document.getElementById("event-details-container");
+    eventDetailsCard.setAttribute("hidden", true);
+}
+
 function insertEventInCell(db, monthNumber, user_id) {
     db.connect();
     let querySentence = `select * from events where month(date)=${monthNumber + 1} and user_id=${user_id}`;
@@ -201,14 +207,22 @@ function insertEventInCell(db, monthNumber, user_id) {
     });
 }
 
+// Invoque post login info retrieve from the main process
+ipcRenderer.invoke("user:get-props").then((response) => {
+    insertEventInCell(db, currentMonth, response.id);
+});
+
 function createEvent(db, event) {
-    let response = api.createEvent(db, event);
-    console.log(response);
-    return response;
+    ipcRenderer.invoke("user:get-props").then((response) => {
+        api.createEvent(db, event, response.id);
+        insertEventInCell(db, currentMonth, response.id);
+    })
 }
 
 let nextMonthButton = document.querySelector("#next-btn");
 nextMonthButton.addEventListener("click", () => { getNextMonth() });
 let prevMonthButton = document.querySelector("#prev-btn");
 prevMonthButton.addEventListener("click", () => { getPreviousMonth() });
+let closeEventButton = document.getElementById("hide-event");
+closeEventButton.addEventListener("click", () => { closeEventDetails() })
 showCalendar(currentMonth, currentYear);
