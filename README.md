@@ -8,3 +8,8 @@ Para instalar las dependencias:
 
 Para compilar y correr la app:
 `yarn start`
+
+# Pendientes
+* Week-view
+* Añadir usuarios a eventos
+* Manejar colisiones
