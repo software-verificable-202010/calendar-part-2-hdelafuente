@@ -1,124 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Add Event</title>
-        <!-- CSS for bootstrap 4 -->
-        <link
-            rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-            crossorigin="anonymous"
-        />
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/js-datepicker/dist/datepicker.min.css"
-        />
-    </head>
-    <body>
-        <div class="container flex">
-            <form>
-                <div>
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="event-title"
-                            placeholder="Title me..."
-                        />
-                    </div>
 
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="event-description"
-                            placeholder="Describe me..."
-                        />
-                    </div>
+<head>
+    <meta charset="UTF-8" />
+    <title>Add Event</title>
+    <!-- CSS for bootstrap 4 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/js-datepicker/dist/datepicker.min.css" />
+</head>
 
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="datepicker"
-                            placeholder="Select a date"
-                        />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="col">
-                            <label>Starting at</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="event-start-hour"
-                                placeholder="hh (24 hour)"
-                            />
-                        </div>
-                        <div class="col">
-                            <label>-</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="event-start-minute"
-                                placeholder="mm"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="col">
-                            <label>Ending at</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="event-end-hour"
-                                placeholder="hh (24 hour)"
-                            />
-                        </div>
-                        <div class="col">
-                            <label>-</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="event-end-minute"
-                                placeholder="mm"
-                            />
-                        </div>
-                    </div>
-                    <hr />
-                    <button type="submit" class="btn-sm btn-primary">
-                        Add Event
-                    </button>
+<body>
+    <div class="container flex">
+        <form>
+            <div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="event-title" placeholder="Title me..." />
                 </div>
-            </form>
-        </div>
 
-        <script>
-            require("../add-event.js");
-        </script>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" class="form-control" id="event-description" placeholder="Describe me..." />
+                </div>
 
-        <!-- Scripst for JQery, Bootstrap, etc... -->
-        <script src="https://unpkg.com/js-datepicker"></script>
-        <script type="text/javascript" src="dist/jquery.timepicker.js"></script>
-        <script
-            src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-            crossorigin="anonymous"
-        ></script>
-    </body>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" class="form-control" id="datepicker" placeholder="Select a date" />
+                </div>
+
+                <div class="form-row">
+                    <div class="col">
+                        <label>Starting at</label>
+                        <input type="text" class="form-control" id="event-start-hour" placeholder="hh (24 hour)" />
+                    </div>
+                    <div class="col">
+                        <label>-</label>
+                        <input type="text" class="form-control" id="event-start-minute" placeholder="mm" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="col">
+                        <label>Ending at</label>
+                        <input type="text" class="form-control" id="event-end-hour" placeholder="hh (24 hour)" />
+                    </div>
+                    <div class="col">
+                        <label>-</label>
+                        <input type="text" class="form-control" id="event-end-minute" placeholder="mm" />
+                    </div>
+                </div>
+                <hr />
+                <label id="select-user-label">Invite</label>
+                <select class="custom-select custom-select-sm" id="select-invited-user">
+                    <option selected>Select a user (optional)</option>
+                </select>
+                <hr>
+                <button type="submit" class="btn-sm btn-primary">
+                    Add Event
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        require("../add-event.js");
+    </script>
+
+    <!-- Scripst for JQery, Bootstrap, etc... -->
+    <script src="https://unpkg.com/js-datepicker"></script>
+    <script type="text/javascript" src="dist/jquery.timepicker.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>

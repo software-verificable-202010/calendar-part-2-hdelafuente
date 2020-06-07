@@ -3,9 +3,6 @@ const electron = require("electron");
 var mysql = require("mysql");
 var moment = require("moment");
 var api = require("./db/db");
-/*
-* Constants for this component
-*/
 const { ipcRenderer } = electron;
 const pathToWeekView = "src/views/week-view.html";
 let today = new Date();
@@ -25,7 +22,6 @@ ipcRenderer.on("event:add", (e, event) => {
     }
 })
 
-// App event in which the week view is shown
 function goToView(path) {
     ipcRenderer.send("view:week", {
         path: path,
@@ -63,9 +59,7 @@ let months = [
 ];
 
 let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
 let monthAndYear = document.getElementById("monthAndYear");
-
 let januaryNumber = 0;
 let decemberNumber = 11;
 
@@ -106,7 +100,6 @@ function fillCalendarTableHead(calendarTableHead) {
         }
         weekDaysRowElement.appendChild(insertHeaderElement);
     }
-
     calendarTableHead.appendChild(weekDaysRowElement);
 }
 
@@ -151,18 +144,17 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
     }
 }
 
-
 function showCalendar(month, year) {
     /*
     * Insert week day short name into the header
     * of the table conatining the calendar
     */
     let calendarTableHead = document.getElementById("calendar-head");
-    fillCalendarTableHead(calendarTableHead);
-
     let calendarTableBody = document.getElementById("calendar-body");
+    fillCalendarTableHead(calendarTableHead);
     fillCalendarTableBody(calendarTableBody, month, year);
 }
+
 /*
  * Event insertion, creation, selection
  */

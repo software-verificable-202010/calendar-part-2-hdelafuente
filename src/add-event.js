@@ -1,14 +1,19 @@
 const electron = require("electron");
 const datepicker = require("js-datepicker");
 const moment = require("moment");
+const mysql = require("mysql");
 // eslint-disable-next-line no-unused-vars
 const picker = datepicker("#datepicker");
-
-
 const { ipcRenderer } = electron;
-
 const form = document.querySelector("form");
 form.addEventListener("submit", addEvent);
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "password",
+    database: "calendar",
+});
+fillUserSelect();
 
 // Event fields are collected and sent to index.js
 function addEvent(e) {
@@ -57,4 +62,18 @@ function isValidTitle(title) {
 
 function isValidDate(date) {
     return date !== "Invalid date";
+}
+
+function fillUserSelect() {
+    let query = `select * from users`;
+    let selectObject = document.getElementById("select-invited-user");
+    db.query(query, (err, result) => {
+        if (err) throw err;
+        result.map((user) => {
+            let optionElement = document.createElement("option");
+            optionElement.value = user.id;
+            optionElement.innerHTML = user.name;
+            selectObject.appendChild(optionElement);
+        })
+    });
 }

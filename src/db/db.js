@@ -130,3 +130,12 @@ module.exports.deleteEvent = (event_id) => {
     msg: "Ok"
   };
 }
+
+module.exports.getAllUsers = () => {
+  let query = `select * from users`;
+  let usersList = db.query(query, (err, result) => {
+    if (err) throw err;
+    return result
+  });
+  return usersList;
+}
