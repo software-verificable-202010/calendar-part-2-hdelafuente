@@ -118,3 +118,15 @@ module.exports.createEvent = (db, event, user_id) => {
     msg: "OK"
   }
 }
+
+module.exports.deleteEvent = (event_id) => {
+  let query = `delete from events where id = ${event_id}`;
+  db.query(query, (err, result) => {
+    if (err) throw err;
+    console.log(result);
+  });
+  return {
+    code: 1,
+    msg: "Ok"
+  };
+}

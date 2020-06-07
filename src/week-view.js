@@ -3,8 +3,9 @@ const electron = require("electron");
 const moment = require("moment");
 const { ipcRenderer } = electron;
 const pathToMonthView = "src/views/month-view.html";
-const monthStringWidth = 2
+const monthStringWidth = 2;
 let today = moment(new Date());
+let count = 1;
 let currentMonth = pad(parseInt(today.format("MM")) + 1, monthStringWidth, '0');
 let currentYear = today.format("YYYY");
 let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -89,7 +90,7 @@ function fillTableBody(weekTableBody) {
 }
 
 function goToNextWeek() {
-    today = moment(new Date(today.add(7, 'days')));
+    today.set('date', parseInt(today.format("D")) + 7);
     console.log(today);
     dateRange = dateRangeConstructor(today);
     console.log(dateRange);
@@ -97,7 +98,7 @@ function goToNextWeek() {
 }
 
 function goToPreviousWeek() {
-    today = moment(new Date(today.subtract(7, 'days')));
+    today = today.subtract(7, 'days');
     console.log(today);
     dateRange = dateRangeConstructor(today);
     console.log(dateRange);

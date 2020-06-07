@@ -94,7 +94,7 @@ function addWeekendBackground(domElement, dayIterator) {
 }
 
 function fillCalendarTableHead(calendarTableHead) {
-    calendarTableHead.innerHTML = ""; // clear the head for month navigation
+    calendarTableHead.innerHTML = ""; // clear the head for navigation
     let weekDaysRowElement = document.createElement("tr");
 
     for (let day = 0; day < daysShortNames.length; day++) {
@@ -181,11 +181,33 @@ function showEventDetails(event) {
     let eventDetailsFooter = document.getElementById("event-details-footer");
     eventDetailsFooter.innerHTML = "";
     eventDetailsFooter.appendChild(document.createTextNode(event.start_time + " - " + event.end_time));
+    let deleteButton = createDeleteButton(event.id);
+    document.getElementById("event-details-body").appendChild(deleteButton);
+}
+
+function createDeleteButton(event_id) {
+    let deleteButton = document.createElement("button");
+    deleteButton.id = "delete-event-btn";
+    deleteButton.classList.add("btn");
+    deleteButton.classList.add("btn-outline-danger");
+    deleteButton.classList.add("btn-sm");
+    let buttonIcon = document.createElement("i");
+    buttonIcon.classList.add("fas");
+    buttonIcon.classList.add("fa-trash");
+    deleteButton.appendChild(buttonIcon);
+    deleteButton.addEventListener("click", () => { deleteEvent(event_id) })
+    return deleteButton;
 }
 
 function closeEventDetails() {
+    document.getElementById("delete-event-btn").remove();
     let eventDetailsCard = document.getElementById("event-details-container");
     eventDetailsCard.setAttribute("hidden", true);
+}
+
+function deleteEvent(event_id) {
+    api.deleteEvent(event_id);
+    location.reload();
 }
 
 function insertEventInCell(db, monthNumber, user_id) {
@@ -207,7 +229,7 @@ function insertEventInCell(db, monthNumber, user_id) {
     });
 }
 
-// Invoque post login info retrieve from the main process
+// Invoke post login info retrieve from the main process
 ipcRenderer.invoke("user:get-props").then((response) => {
     insertEventInCell(db, currentMonth, response.id);
 });
@@ -224,5 +246,5 @@ nextMonthButton.addEventListener("click", () => { getNextMonth() });
 let prevMonthButton = document.querySelector("#prev-btn");
 prevMonthButton.addEventListener("click", () => { getPreviousMonth() });
 let closeEventButton = document.getElementById("hide-event");
-closeEventButton.addEventListener("click", () => { closeEventDetails() })
+closeEventButton.addEventListener("click", () => { closeEventDetails() });
 showCalendar(currentMonth, currentYear);

@@ -1,80 +1,58 @@
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=1920, initial-scale=1.0" />
-        <title>Calendar App</title>
-        <!-- CSS for bootstrap 4 -->
-        <link
-            rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-            crossorigin="anonymous"
-        />
 
-        <!-- Font awesome -->
-        <script
-            src="https://kit.fontawesome.com/985fbf8f57.js"
-            crossorigin="anonymous"
-        ></script>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, initial-scale=1.0" />
+    <title>Calendar App</title>
+    <!-- CSS for bootstrap 4 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
 
-        <link rel="stylesheet" href="../css/calendar.css" />
-    </head>
-    <body>
-        <div class="container flex">
-            <div class="container">Use ctrl(cmd)+e to add event</div>
-            <div class="card">
-                <div class="form-inline">
-                    <button
-                        class="btn btn-outline-primary btn-sm"
-                        id="previous-week"
-                    >
-                        <i class="fas fa-angle-left"></i>
-                    </button>
+    <!-- Font awesome -->
+    <script src="https://kit.fontawesome.com/985fbf8f57.js" crossorigin="anonymous"></script>
 
-                    <button
-                        class="btn btn-outline-primary btn-sm"
-                        id="next-week"
-                    >
-                        <i class="fas fa-angle-right"></i>
-                    </button>
-                    <hr />
-                    <button
-                        class="btn btn-outline-secondary btn-sm"
-                        id="month-view-btn"
-                    >
-                        Week View
-                    </button>
-                </div>
-                <h3 class="card-header" id="monthAndYear"></h3>
-                <table
-                    class="table table-bordered table-responsive-sm"
-                    id="week-table"
-                >
-                    <thead id="week-table-head"></thead>
+    <link rel="stylesheet" href="../css/calendar.css" />
+</head>
 
-                    <tbody id="week-table-body"></tbody>
-                </table>
+<body>
+    <div class="container flex">
+        <div class="container">Use ctrl(cmd)+e to add event</div>
+        <div class="card">
+            <div class="form-inline">
+                <button class="btn btn-outline-primary btn-sm" id="previous-week">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+
+                <button class="btn btn-outline-primary btn-sm" id="next-week">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <hr />
+                <button class="btn btn-outline-secondary btn-sm" id="month-view-btn">
+                    Month View
+                </button>
             </div>
+            <h3 class="card-header" id="monthAndYear"></h3>
+            <table class="table table-bordered table-responsive-sm" id="week-table">
+                <thead id="week-table-head"></thead>
+
+                <tbody id="week-table-body"></tbody>
+            </table>
         </div>
+    </div>
 
-        <!-- Controllers -->
-        <script src="../week-view.js"></script>
+    <!-- Controllers -->
+    <script src="../week-view.js"></script>
 
-        <!-- Scripst for JQery, Bootstrap, etc... -->
-        <script
-            src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-            crossorigin="anonymous"
-        ></script>
-    </body>
+    <!-- Scripst for JQery, Bootstrap, etc... -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>
