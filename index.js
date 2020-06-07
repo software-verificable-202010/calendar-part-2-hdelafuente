@@ -20,23 +20,34 @@ let addEventWindow;
 
 db.connect((err) => {
     if (!err) {
-        console.log(err);
+        console.log("err: ", err);
         db.query("CREATE DATABASE IF NOT EXISTS calendar", (err, result) => {
             if (err) throw err;
             console.log("Database created!")
             console.log(result);
         })
-        let createUserTable = `create table if not exists users (\
+        createUserTable(db);
+        createEventTable(db);
+        createGuestTable(db);
+    }
+
+})
+
+function createUserTable(db) {
+    let createUserTableQuery = `create table if not exists users (\
         id int not null auto_increment,\
         username varchar(100),\
         name varchar(100),
         primary key (id))`
-        db.query(createUserTable, (err, result) => {
-            if (err) throw err;
-            console.log("Users table created!");
-            console.log(result);
-        })
-        let createEventTable = `create table if not exists events(
+    db.query(createUserTableQuery, (err, result) => {
+        if (err) throw err;
+        console.log("Users table created!");
+        console.log(result);
+    })
+}
+
+function createEventTable(db) {
+    let createEventTableQuery = `create table if not exists events(
             id int not null auto_increment, 
             title varchar(100), 
             description varchar(200), 
@@ -50,14 +61,21 @@ db.connect((err) => {
                 references users(id) 
                 on delete cascade
             )`
-        db.query(createEventTable, (err, result) => {
-            if (err) throw err
-            console.log("Event table created");
-            console.log(result)
-        })
-    }
+    db.query(createEventTableQuery, (err, result) => {
+        if (err) throw err
+        console.log("Event table created");
+        console.log(result)
+    });
+}
 
-})
+function createGuestTable(db) {
+    let query = `create table if not exists guests(id int auto_increment primary key, event_id int, guest_id int)`;
+    db.query(query, (err, result) => {
+        if (err) throw err;
+        console.log("Guest table created")
+        console.log(result);
+    })
+}
 
 const { app, BrowserWindow, Menu, ipcMain } = electron;
 
