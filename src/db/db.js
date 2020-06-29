@@ -65,7 +65,7 @@ module.exports.login = (username) => {
 
 /* New users are registered when the db doesn't have a matching row
  * Also, new users will have a random name
- * TODO: Regiser form
+ * TODO: Register form
 */
 function registerUser(username) {
   let newUserName = randomNames[Math.floor(Math.random() * randomNames.length)];
@@ -92,9 +92,10 @@ function goToView(path, user) {
 module.exports.getUserEvents = (user_id) => {
   db.connect();
   let query = `select * from events where user_id=${user_id}`;
-  let dbResult = db.query(query, (err, result) => {
+  var dbResult;
+  db.query(query, (err, result) => {
     if (err) throw err;
-    return result;
+    dbResult = result
   });
   return dbResult;
 }

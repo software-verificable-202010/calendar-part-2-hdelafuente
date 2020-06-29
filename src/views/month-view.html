@@ -62,6 +62,16 @@
 
     <script>
         require("../month-view.js");
+        require("../month-view-const.js");
+        ipcRenderer.on("event:add", (e, event) => {
+            if (event.error) {
+              let alertDiv = document.querySelector("#alert-div");
+              alertDiv.innerHTML = event.error;
+            } else {
+              createEvent(db, event);
+              showCalendar(vars.currentMonth, vars.currentYear);
+            }
+          })
     </script>
 
     <!-- Scripst for JQery, Bootstrap, etc... -->

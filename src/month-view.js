@@ -1,40 +1,39 @@
+/* eslint-disable no-undefined */
 /* eslint-disable init-declarations */
 const electron = require("electron");
+const vars = require('./month-view-const');
 var mysql = require("mysql");
 var moment = require("moment");
 var api = require("./db/db");
+const { okStatus } = require('./month-view-const');
 const { ipcRenderer } = electron;
-const pathToWeekView = "src/views/week-view.html";
-let today = new Date();
-let currentMonth = today.getMonth();
-let currentYear = today.getFullYear();
 
-/*
- * Events from ipcRenderer
-*/
-ipcRenderer.on("event:add", (e, event) => {
-    if (event.error) {
-        let alertDiv = document.querySelector("#alert-div");
-        alertDiv.innerHTML = event.error;
-    } else {
-        createEvent(db, event);
-        showCalendar(currentMonth, currentYear);
+function addEventListeners() {
+  if (vars.nextMonthButton === null || vars.nextMonthButton === undefined ||
+    vars.prevMonthButton === null || vars.prevMonthButton === undefined ||
+    vars.closeEventButton === null || vars.closeEventButton === undefined ||
+    vars.weekViewButton === null) {
+      return vars.errorStatus;
     }
-})
+  vars.nextMonthButton.addEventListener("click", () => { getNextMonth() });
+  vars.prevMonthButton.addEventListener("click", () => { getPreviousMonth() });
+  vars.closeEventButton.addEventListener("click", () => { closeEventDetails() });
+  vars.weekViewButton.addEventListener("click", () => {
+    goToView(vars.pathToWeekView);
+  })
+  return okStatus;
+}
+
 
 function goToView(path) {
     ipcRenderer.send("view:week", {
         path: path,
-        today: today,
-        currentMonth: currentMonth,
-        currentYear: currentYear
+        today: vars.today,
+        currentMonth: vars.currentMonth,
+        currentYear: vars.currentYear
     });
+    return vars.okStatus;
 }
-
-let weekViewButton = document.querySelector("#week-view-btn");
-weekViewButton.addEventListener("click", () => {
-    goToView(pathToWeekView);
-})
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -43,42 +42,25 @@ let db = mysql.createConnection({
     database: "calendar",
 });
 
-let months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-];
-
-let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-let monthAndYear = document.getElementById("monthAndYear");
-let januaryNumber = 0;
-let decemberNumber = 11;
 
 /*
 * Navigation Functions
 */
 function getNextMonth() {
-    currentYear =
-        currentMonth === decemberNumber ? currentYear + 1 : currentYear;
-    currentMonth = (currentMonth + 1) % (decemberNumber + 1);
-    showCalendar(currentMonth, currentYear);
+    vars.currentYear =
+        vars.currentMonth === vars.decemberNumber ? vars.currentYear + 1 : vars.currentYear;
+    vars.currentMonth = (vars.currentMonth + 1) % (vars.decemberNumber + 1);
+    showCalendar(vars.currentMonth, vars.currentYear);
+    return vars.okStatus;
 }
 
 function getPreviousMonth() {
-    currentYear =
-        currentMonth === januaryNumber ? currentYear - 1 : currentYear;
-    currentMonth =
-        currentMonth === januaryNumber ? decemberNumber : currentMonth - 1;
-    showCalendar(currentMonth, currentYear);
+    vars.currentYear =
+        vars.currentMonth === vars.januaryNumber ? vars.currentYear - 1 : vars.currentYear;
+    vars.currentMonth =
+        vars.currentMonth === vars.januaryNumber ? vars.decemberNumber : vars.currentMonth - 1;
+    showCalendar(vars.currentMonth, vars.currentYear);
+    return vars.okStatus;
 }
 
 function addWeekendBackground(domElement, dayIterator) {
@@ -87,28 +69,56 @@ function addWeekendBackground(domElement, dayIterator) {
     }
 }
 
+function showCalendar(month, year) {
+  /*
+  * Insert week day short name into the header
+  * of the table conatining the calendar
+  */
+  let calendarTableHead = document.getElementById("calendar-head");
+  let calendarTableBody = document.getElementById("calendar-body");
+  if (calendarTableBody === undefined || calendarTableHead === undefined) {
+    return vars.errorStatus;
+  }
+  fillCalendarTableHead(calendarTableHead);
+  fillCalendarTableBody(calendarTableBody, month, year);
+  return vars.okStatus;
+}
+
 function fillCalendarTableHead(calendarTableHead) {
+  if (calendarTableHead === null) {
+    return vars.errorStatus;
+  }
     calendarTableHead.innerHTML = ""; // clear the head for navigation
     let weekDaysRowElement = document.createElement("tr");
+    if (vars.weekViewButton === undefined) {
+      return vars.errorStatus;
+    }
 
-    for (let day = 0; day < daysShortNames.length; day++) {
+    for (let day = 0; day < vars.daysShortNames.length; day++) {
         const insertHeaderElement = document.createElement("th");
-        const dayNameText = document.createTextNode(daysShortNames[day]);
+        if (insertHeaderElement === undefined) {
+          return vars.errorStatus;
+        }
+        const dayNameText = document.createTextNode(vars.daysShortNames[day]);
         insertHeaderElement.appendChild(dayNameText);
-        if (daysShortNames[day] === "Sun" || daysShortNames[day] === "Sat") {
+        if (vars.daysShortNames[day] === "Sun" || vars.daysShortNames[day] === "Sat") {
             insertHeaderElement.classList.add("weekend-bg");
         }
         weekDaysRowElement.appendChild(insertHeaderElement);
     }
     calendarTableHead.appendChild(weekDaysRowElement);
+    return vars.okStatus;
 }
 
 function fillCalendarTableBody(calendarTableBody, month, year) {
+    if (calendarTableBody === null) {
+      return vars.errorStatus;
+    }
     let firstDay = new Date(year, month).getDay() === 0 ? 7 : new Date(year, month).getDay();
     let maxDayAmount = 32;
     let daysInMonth = maxDayAmount - new Date(year, month, maxDayAmount).getDate();
     calendarTableBody.innerHTML = ""; // clear the table for month navigation
-    monthAndYear.innerHTML = months[month] + " " + year;
+    vars.monthAndYear.innerHTML = vars.months[month] + " " + year;
     let maxColumnsNumber = 8;
     let maxRowsNumber = 7;
     let date = 1;
@@ -121,20 +131,16 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
                 addWeekendBackground(dayCell, j);
                 dayCell.appendChild(dayNumber);
                 weekRow.appendChild(dayCell);
-            } else if (date > daysInMonth) {
-                break;
-            } else {
+            } else if (date > daysInMonth) { break; } else {
                 let dayNumber = document.createTextNode(date.toString());
-                let dayCellId = moment(new Date(currentYear, currentMonth, date)).format("YYYY-MM-DD");
+                let dayCellId = moment(new Date(vars.currentYear, vars.currentMonth, date)).format("YYYY-MM-DD");
                 dayCell.setAttribute('id', dayCellId);
                 addWeekendBackground(dayCell, j);
                 if (
-                    date === today.getDate() &&
-                    year === today.getFullYear() &&
-                    month === today.getMonth()
-                ) {
-                    dayCell.classList.add("today-bg");
-                } // color today's date
+                    date === vars.today.getDate() &&
+                    year === vars.today.getFullYear() &&
+                    month === vars.today.getMonth()
+                ) { dayCell.classList.add("today-bg"); } // color today's date
                 dayCell.appendChild(dayNumber);
                 weekRow.appendChild(dayCell);
                 date++;
@@ -142,39 +148,62 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
         }
         calendarTableBody.appendChild(weekRow);
     }
+  return vars.okStatus;
 }
 
-function showCalendar(month, year) {
-    /*
-    * Insert week day short name into the header
-    * of the table conatining the calendar
-    */
-    let calendarTableHead = document.getElementById("calendar-head");
-    let calendarTableBody = document.getElementById("calendar-body");
-    fillCalendarTableHead(calendarTableHead);
-    fillCalendarTableBody(calendarTableBody, month, year);
+
+function createEvent(db, event) {
+  ipcRenderer.invoke("user:get-props").then((response) => {
+    api.createEvent(db, event, response.id);
+    insertEventInCell(db, vars.currentMonth, response.id);
+  })
 }
 
-/*
- * Event insertion, creation, selection
- */
+function insertEventInCell(db, monthNumber, user_id) {
+  db.connect();
+  let querySentence = `select * from events where month(date)=${monthNumber + 1} and user_id=${user_id}`;
+  db.query(querySentence, (err, results) => {
+    if (err) throw err;
+    results.map((event) => {
+      let formattedDate = moment(event.date).format("YYYY-MM-DD").toString();
+      let dayCell = document.getElementById(formattedDate);
+      let spanElement = document.createElement("span");
+      spanElement.classList.add("badge");
+      spanElement.classList.add("badge-pill");
+      spanElement.classList.add("badge-dark");
+      spanElement.addEventListener("click", () => { showEventDetails(event) });
+      spanElement.innerHTML = "!";
+      dayCell.appendChild(spanElement);
+    });
+  });
+}
+
 function showEventDetails(event) {
     let containerElement = document.getElementById("event-details-container");
-    containerElement.removeAttribute("hidden");
     let eventDetailsHeader = document.getElementById("event-details-header");
+    let eventDetailsTitle = document.getElementById("event-details-title");
+    let eventDetailsText = document.getElementById("event-details-text");
+    let eventDetailsFooter = document.getElementById("event-details-footer");
+    let deleteButton = createDeleteButton(event.id);
+    let eventDetailsBodyElement = document.getElementById("event-details-body")
+    if (containerElement === null ||
+        eventDetailsHeader === null ||
+        eventDetailsText === null ||
+        eventDetailsFooter === null ||
+        eventDetailsBodyElement === null) {
+          return vars.errorStatus;
+        }
+    containerElement.removeAttribute("hidden");
     eventDetailsHeader.innerHTML = "";
     eventDetailsHeader.appendChild(document.createTextNode(moment(event.date).format("YYYY-MM-DD")));
-    let eventDetailsTitle = document.getElementById("event-details-title");
     eventDetailsTitle.innerHTML = "";
     eventDetailsTitle.appendChild(document.createTextNode(event.title));
-    let eventDetailsText = document.getElementById("event-details-text");
     eventDetailsText.innerHTML = "";
     eventDetailsText.appendChild(document.createTextNode(event.description));
-    let eventDetailsFooter = document.getElementById("event-details-footer");
     eventDetailsFooter.innerHTML = "";
     eventDetailsFooter.appendChild(document.createTextNode(event.start_time + " - " + event.end_time));
-    let deleteButton = createDeleteButton(event.id);
-    document.getElementById("event-details-body").appendChild(deleteButton);
+    eventDetailsBodyElement.appendChild(deleteButton);
+    return vars.okStatus;
 }
 
 function createDeleteButton(event_id) {
@@ -192,9 +221,14 @@ function createDeleteButton(event_id) {
 }
 
 function closeEventDetails() {
-    document.getElementById("delete-event-btn").remove();
+    let deleteEventButton = document.getElementById("delete-event-btn");
     let eventDetailsCard = document.getElementById("event-details-container");
+    if (eventDetailsCard === null || deleteEventButton === null) {
+      return vars.errorStatus;
+    }
+    deleteEventButton.remove();
     eventDetailsCard.setAttribute("hidden", true);
+    return vars.okStatus;
 }
 
 function deleteEvent(event_id) {
@@ -202,41 +236,15 @@ function deleteEvent(event_id) {
     location.reload();
 }
 
-function insertEventInCell(db, monthNumber, user_id) {
-    db.connect();
-    let querySentence = `select * from events where month(date)=${monthNumber + 1} and user_id=${user_id}`;
-    db.query(querySentence, (err, results) => {
-        if (err) throw err;
-        results.map((event) => {
-            let formattedDate = moment(event.date).format("YYYY-MM-DD").toString();
-            let dayCell = document.getElementById(formattedDate);
-            let spanElement = document.createElement("span");
-            spanElement.classList.add("badge");
-            spanElement.classList.add("badge-pill");
-            spanElement.classList.add("badge-dark");
-            spanElement.addEventListener("click", () => { showEventDetails(event) });
-            spanElement.innerHTML = "!";
-            dayCell.appendChild(spanElement);
-        });
-    });
+addEventListeners();
+showCalendar(vars.currentMonth, vars.currentYear);
+
+module.exports = {
+  getNextMonth,
+  getPreviousMonth,
+  fillCalendarTableHead,
+  fillCalendarTableBody,
+  showCalendar,
+  showEventDetails,
+  closeEventDetails
 }
-
-// Invoke post login info retrieve from the main process
-ipcRenderer.invoke("user:get-props").then((response) => {
-    insertEventInCell(db, currentMonth, response.id);
-});
-
-function createEvent(db, event) {
-    ipcRenderer.invoke("user:get-props").then((response) => {
-        api.createEvent(db, event, response.id);
-        insertEventInCell(db, currentMonth, response.id);
-    })
-}
-
-let nextMonthButton = document.querySelector("#next-btn");
-nextMonthButton.addEventListener("click", () => { getNextMonth() });
-let prevMonthButton = document.querySelector("#prev-btn");
-prevMonthButton.addEventListener("click", () => { getPreviousMonth() });
-let closeEventButton = document.getElementById("hide-event");
-closeEventButton.addEventListener("click", () => { closeEventDetails() });
-showCalendar(currentMonth, currentYear);

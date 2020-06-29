@@ -77,3 +77,10 @@ function fillUserSelect() {
         })
     });
 }
+
+module.exports = {
+  isValidDate,
+  isValidHourRange,
+  isValidMinuteField,
+  isValidTitle
+}

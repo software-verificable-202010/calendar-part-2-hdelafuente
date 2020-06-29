@@ -94,7 +94,7 @@ function createWindow() {
     });
 
     mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, "src/views/login.html"),
+        pathname: path.join(__dirname, "src/views/month-view.html"),
         protocol: "file:",
         slashes: true,
     }));
