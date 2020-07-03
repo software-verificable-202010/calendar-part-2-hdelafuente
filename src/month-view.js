@@ -1,12 +1,12 @@
 /* eslint-disable no-undefined */
 /* eslint-disable init-declarations */
 const electron = require("electron");
+const { ipcRenderer } = electron;
 const vars = require('./month-view-const');
 var mysql = require("mysql");
 var moment = require("moment");
 var api = require("./db/db");
 const { okStatus } = require('./month-view-const');
-const { ipcRenderer } = electron;
 
 function addEventListeners() {
   if (vars.nextMonthButton === null || vars.nextMonthButton === undefined ||
@@ -34,13 +34,6 @@ function goToView(path) {
     });
     return vars.okStatus;
 }
-
-let db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "password",
-    database: "calendar",
-});
 
 
 /*
@@ -152,13 +145,6 @@ function fillCalendarTableBody(calendarTableBody, month, year) {
 }
 
 
-function createEvent(db, event) {
-  ipcRenderer.invoke("user:get-props").then((response) => {
-    api.createEvent(db, event, response.id);
-    insertEventInCell(db, vars.currentMonth, response.id);
-  })
-}
-
 function insertEventInCell(db, monthNumber, user_id) {
   db.connect();
   let querySentence = `select * from events where month(date)=${monthNumber + 1} and user_id=${user_id}`;
@@ -171,38 +157,32 @@ function insertEventInCell(db, monthNumber, user_id) {
       spanElement.classList.add("badge");
       spanElement.classList.add("badge-pill");
       spanElement.classList.add("badge-dark");
-      spanElement.addEventListener("click", () => { showEventDetails(event) });
+      spanElement.addEventListener("click", () => { showEventDetails(event, vars.eventDetailsElements) });
       spanElement.innerHTML = "!";
       dayCell.appendChild(spanElement);
     });
   });
 }
 
-function showEventDetails(event) {
-    let containerElement = document.getElementById("event-details-container");
-    let eventDetailsHeader = document.getElementById("event-details-header");
-    let eventDetailsTitle = document.getElementById("event-details-title");
-    let eventDetailsText = document.getElementById("event-details-text");
-    let eventDetailsFooter = document.getElementById("event-details-footer");
+function showEventDetails(event, elements) {
     let deleteButton = createDeleteButton(event.id);
-    let eventDetailsBodyElement = document.getElementById("event-details-body")
-    if (containerElement === null ||
-        eventDetailsHeader === null ||
-        eventDetailsText === null ||
-        eventDetailsFooter === null ||
-        eventDetailsBodyElement === null) {
+    if (elements.containerElement === null ||
+        elements.eventDetailsHeader === null ||
+        elements.eventDetailsText === null ||
+        elements.eventDetailsFooter === null ||
+        elements.eventDetailsBodyElement === null) {
           return vars.errorStatus;
         }
-    containerElement.removeAttribute("hidden");
-    eventDetailsHeader.innerHTML = "";
-    eventDetailsHeader.appendChild(document.createTextNode(moment(event.date).format("YYYY-MM-DD")));
-    eventDetailsTitle.innerHTML = "";
-    eventDetailsTitle.appendChild(document.createTextNode(event.title));
-    eventDetailsText.innerHTML = "";
-    eventDetailsText.appendChild(document.createTextNode(event.description));
-    eventDetailsFooter.innerHTML = "";
-    eventDetailsFooter.appendChild(document.createTextNode(event.start_time + " - " + event.end_time));
-    eventDetailsBodyElement.appendChild(deleteButton);
+    elements.containerElement.removeAttribute("hidden");
+    elements.eventDetailsHeader.innerHTML = "";
+    elements.eventDetailsHeader.appendChild(document.createTextNode(moment(event.date).format("YYYY-MM-DD")));
+    elements.eventDetailsTitle.innerHTML = "";
+    elements.eventDetailsTitle.appendChild(document.createTextNode(event.title));
+    elements.eventDetailsText.innerHTML = "";
+    elements.eventDetailsText.appendChild(document.createTextNode(event.description));
+    elements.eventDetailsFooter.innerHTML = "";
+    elements.eventDetailsFooter.appendChild(document.createTextNode(event.start_time + " - " + event.end_time));
+    elements.eventDetailsBodyElement.appendChild(deleteButton);
     return vars.okStatus;
 }
 
@@ -246,5 +226,6 @@ module.exports = {
   fillCalendarTableBody,
   showCalendar,
   showEventDetails,
-  closeEventDetails
+  closeEventDetails,
+  insertEventInCell
 }

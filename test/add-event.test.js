@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const addEvent = require('../src/add-event');
 
 test('[isValidHourRange] return true', () => {

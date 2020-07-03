@@ -30,5 +30,12 @@
   },
   "devDependencies": {
     "eslint": "^7.0.0"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverageFrom": [
+      "src/*.{js,jsx}",
+      "src/db/*.{js,jsx}"
+    ]
   }
 }

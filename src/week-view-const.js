@@ -1,16 +1,27 @@
 const moment = require('moment');
-const weekView = require('./week-view');
+const electron = require('electron');
+const { ipcRenderer } = electron;
 
-let monthViewButton = document.querySelector("#month-view-btn");
-const pathToMonthView = "src/views/month-view.html";
+let monthViewButton = document.querySelector('#month-view-btn');
+const pathToMonthView = 'src/views/month-view.html';
 const monthStringWidth = 2;
 let today = moment(new Date());
-let currentMonth = weekView.pad(parseInt(today.format("MM")) + 1, monthStringWidth, '0');
-let currentYear = today.format("YYYY");
-let daysShortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-let daysNames = ["Hour", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+let currentMonth = today.format('MM');
+let currentYear = today.format('YYYY');
+let daysShortNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+let daysNames = ['Hour', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 let oneAM = 1;
 let elevenPM = 24;
+
+let monthAndYear = document.querySelector('#monthAndYear');
+let weekTableHead = document.querySelector('#week-table-head');
+let weekTableBody = document.querySelector('#week-table-body');
+
+let tableElements = {
+  monthAndYear: monthAndYear,
+  weekTableBody: weekTableBody,
+  weekTableHead: weekTableHead
+}
 
 module.exports = {
   monthViewButton,
@@ -22,5 +33,9 @@ module.exports = {
   daysShortNames,
   daysNames,
   oneAM,
-  elevenPM
+  elevenPM,
+  monthAndYear,
+  weekTableBody,
+  weekTableHead,
+  tableElements
 }

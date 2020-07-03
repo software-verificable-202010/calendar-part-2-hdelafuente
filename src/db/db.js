@@ -140,3 +140,7 @@ module.exports.getAllUsers = () => {
   });
   return usersList;
 }
+
+module.exports = {
+  db
+}

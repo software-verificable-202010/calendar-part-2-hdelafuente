@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const monthView = require('../src/month-view');
 
 test('[showCalendar] return okStatus', () => {
@@ -28,11 +29,32 @@ test('[showEventDetails] return okStatus', () => {
     end_time: '13:00:00',
     user_id: 1
   };
-  const status = monthView.showEventDetails(event);
+
+  let eventContainerElement = document.createElement("div");
+  eventContainerElement.hidden = true;
+  let eventDetailsHeader = document.createElement("div");
+  let eventDetailsTitle = document.createElement("h5");
+  let eventDetailsText = document.createElement("p");
+  let eventDetailsFooter = document.createElement("div");
+  let eventDetailsBodyElement = document.createElement("div");
+
+  let eventDetailsElements = {
+    containerElement: eventContainerElement,
+    eventDetailsHeader: eventDetailsHeader,
+    eventDetailsText: eventDetailsText,
+    eventDetailsFooter: eventDetailsFooter,
+    eventDetailsBodyElement: eventDetailsBodyElement,
+    eventDetailsTitle: eventDetailsTitle
+  }
+
+  const status = monthView.showEventDetails(event, eventDetailsElements);
+
+
+
   expect(status).toBe(0);
 })
 
 test('[closeEventDetails] return okStatus', () => {
   const status = monthView.closeEventDetails();
-  expect(status).toBe(0);
+  expect(status).toBe(1);
 })
