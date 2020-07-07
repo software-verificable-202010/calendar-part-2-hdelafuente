@@ -3,7 +3,6 @@
 const electron = require('electron');
 const { ipcRenderer } = electron;
 const vars = require('./month-view-const');
-var mysql = require('mysql');
 var moment = require('moment');
 var api = require('./db/db');
 const { okStatus } = require('./month-view-const');
@@ -74,7 +73,7 @@ function showCalendar(month, year) {
   }
   fillCalendarTableHead(calendarTableHead);
   fillCalendarTableBody(calendarTableBody, month, year);
-  insertEventInCell(api.db, month, 1);
+  // insertEventInCell(api.db, month, 1);
   return vars.okStatus;
 }
 
@@ -173,7 +172,8 @@ function showEventDetails(event, elements) {
         elements.eventDetailsHeader === null ||
         elements.eventDetailsText === null ||
         elements.eventDetailsFooter === null ||
-        elements.eventDetailsBodyElement === null) {
+        elements.eventDetailsBodyElement === null ||
+        elements.eventDetailsTitle === null) {
           return vars.errorStatus;
         }
     elements.containerElement.removeAttribute('hidden');

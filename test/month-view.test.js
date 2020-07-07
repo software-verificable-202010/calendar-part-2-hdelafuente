@@ -48,9 +48,6 @@ test('[showEventDetails] return okStatus', () => {
   }
 
   const status = monthView.showEventDetails(event, eventDetailsElements);
-
-
-
   expect(status).toBe(0);
 })
 

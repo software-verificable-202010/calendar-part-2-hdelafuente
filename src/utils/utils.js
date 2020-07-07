@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 function pad(n, width, z) {
   z = z || '0';
   n = String(n);

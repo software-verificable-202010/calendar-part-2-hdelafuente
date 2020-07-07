@@ -63,18 +63,13 @@ function checkConnection(db) {
 }
 
 function login (username) {
-  if (db.state === 'disconnected') {
-    db.connect((err, result) => {
-      if (err) console.log(err);
-      else console.log(result);
-    });
-  }
   let query = `select * from users where username='${username}'`;
   db.query(query, (err, result) => {
     if (err) throw err;
     if (result.length === 0) {
       registerUser(username);
     } else goToView(pathToMonthView, result[0]);
+    return 0;
   });
 }
 
@@ -92,11 +87,13 @@ function registerUser(username) {
 
   db.query(`select * from users where username='${username}'`, (err, result) => {
     if (err) throw err;
-    goToView(pathToMonthView, result[0]);
+    // goToView(pathToMonthView, result[0]);
   })
 }
 
+
 function goToView(path, user) {
+  if (ipcRenderer === undefined) return 1;
   ipcRenderer.send("event:login", {
     path: path,
     user: user,
@@ -171,7 +168,7 @@ module.exports.getAllUsers = () => {
 module.exports = {
   db,
   login,
-  goToView,
   registerUser,
-  getUserEvents
+  getUserEvents,
+  checkConnection
 }
