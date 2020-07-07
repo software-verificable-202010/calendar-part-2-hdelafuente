@@ -44,6 +44,7 @@ const randomLastNames = [
   " merino",
   " canales"
 ]
+
 let db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -51,9 +52,23 @@ let db = mysql.createConnection({
   database: "calendar",
 });
 
+function checkConnection(db) {
+  if (db.state === 'disconnected') {
+    db.connect((err, result) => {
+      if (err) console.log(err);
+      else console.log(result);
+    });
+  }
+  return 0;
+}
 
-module.exports.login = (username) => {
-  db.connect()
+function login (username) {
+  if (db.state === 'disconnected') {
+    db.connect((err, result) => {
+      if (err) console.log(err);
+      else console.log(result);
+    });
+  }
   let query = `select * from users where username='${username}'`;
   db.query(query, (err, result) => {
     if (err) throw err;
@@ -65,7 +80,6 @@ module.exports.login = (username) => {
 
 /* New users are registered when the db doesn't have a matching row
  * Also, new users will have a random name
- * TODO: Register form
 */
 function registerUser(username) {
   let newUserName = randomNames[Math.floor(Math.random() * randomNames.length)];
@@ -85,23 +99,36 @@ function registerUser(username) {
 function goToView(path, user) {
   ipcRenderer.send("event:login", {
     path: path,
-    user: user
+    user: user,
   });
 }
 
-module.exports.getUserEvents = (user_id) => {
-  db.connect();
+function getUserEvents (user_id) {
+  var events = [];
+  if (db.state === 'disconnected') {
+    db.connect((err, result) => {
+      if (err) console.log(err);
+      else console.log(result);
+    });
+  }
   let query = `select * from events where user_id=${user_id}`;
-  var dbResult;
   db.query(query, (err, result) => {
     if (err) throw err;
-    dbResult = result
+    for (const event of result) {
+      events.append(event);
+    }
   });
-  return dbResult;
+  console.log('Holaaaa', events);
+  return events;
 }
 
-module.exports.createEvent = (db, event, user_id) => {
-  db.connect();
+module.exports.createEvent = (event, user_id) => {
+  if (db.state === 'disconnected') {
+    db.connect((err, result) => {
+      if (err) console.log(err);
+      else console.log(result);
+    });
+  }
   let querySentence = `insert into events(title, description, date, start_time, end_time, user_id) values (
     '${event.title}',
     '${event.description}',
@@ -142,5 +169,9 @@ module.exports.getAllUsers = () => {
 }
 
 module.exports = {
-  db
+  db,
+  login,
+  goToView,
+  registerUser,
+  getUserEvents
 }

@@ -5,6 +5,7 @@ const electron = require("electron");
 const url = require("url");
 const path = require("path");
 const mysql = require("mysql");
+const api = require('./src/db/db');
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -94,7 +95,7 @@ function createWindow() {
     });
 
     mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, "src/views/month-view.html"),
+        pathname: path.join(__dirname, "src/views/login.html"),
         protocol: "file:",
         slashes: true,
     }));
@@ -137,25 +138,25 @@ function createAddEventWindow() {
 
 // IPC Event Listener
 ipcMain.on("event:login", (e, props) => {
-    console.log("props: ", props);
-    mainWindow.close();
-    user = props.user;
 
-    mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 600,
-        title: "Calendar",
-        webPreferences: {
-            nodeIntegration: true
-        }
-    });
+  var newWindow = new BrowserWindow({
+    width: 1200,
+    height: 600,
+    title: "Calendar",
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+  console.log("props: ", props);
+  user = props.user;
+  newWindow.loadURL(url.format({
+    pathname: path.join(__dirname, props.path),
+    protocol: "file:",
+    slashes: true,
+  }));
+  mainWindow.close();
 
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, props.path),
-        protocol: "file:",
-        slashes: true,
-    }));
-
+  mainWindow = newWindow;
 })
 
 ipcMain.handle("user:get-props", async () => {
@@ -165,28 +166,26 @@ ipcMain.handle("user:get-props", async () => {
 
 ipcMain.on("event:add", (e, event) => {
     console.log(event);
-    mainWindow.webContents.send("event:add", event);
-    addEventWindow.close();
+    api.createEvent(event, user.id);
 })
 
 ipcMain.on("view:week", (e, message) => {
-    console.log(message);
-    mainWindow.close();
-
-    mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 600,
-        title: "Calendar",
-        webPreferences: {
-            nodeIntegration: true
-        }
-    });
-
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, message.path),
-        protocol: "file:",
-        slashes: true,
+  var newWindow = new BrowserWindow({
+    width: 1200,
+    height: 600,
+    title: "Calendar",
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+  console.log(message);
+  newWindow.loadURL(url.format({
+      pathname: path.join(__dirname, message.path),
+      protocol: "file:",
+      slashes: true,
     }));
+  mainWindow.close();
+  mainWindow = newWindow;
 
 })
 

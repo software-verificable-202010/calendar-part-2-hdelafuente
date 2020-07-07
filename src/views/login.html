@@ -24,7 +24,11 @@
   </div>
 
   <script>
-    require("../login.js");
+    const login = require("../login.js");
+    let userNameTextElement = document.querySelector('#username-text');
+    let loginForm = document.querySelector('form');
+    loginForm.addEventListener('submit', () => { login.doLogin(userNameTextElement) });
+
   </script>
   <!-- Scripst for JQery, Bootstrap, etc... -->
   <script src="https://unpkg.com/js-datepicker"></script>

@@ -1,9 +1,7 @@
 const electron = require('electron');
-const moment = require('moment');
 const mysql = require('mysql');
 const vars = require('./add-event-const');
 const { ipcRenderer } = electron;
-vars.form.addEventListener('submit', addEvent);
 
 let db = mysql.createConnection({
     host: 'localhost',
@@ -15,31 +13,21 @@ let db = mysql.createConnection({
 fillUserSelect();
 
 // Event fields are collected and sent to index.js
-function addEvent(e) {
-    e.preventDefault();
-    const startHour = document.querySelector('#event-start-hour').value;
-    const endHour = document.querySelector('#event-end-hour').value;
-    const startMinutes = document.querySelector('#event-start-minute').value;
-    const endMinutes = document.querySelector('#event-end-minute').value;
-    const title = document.querySelector('#event-title').value;
-    const date = moment(document.querySelector('#datepicker').value).format('YYYY-MM-DD');
-    const hourSeparator = ':';
-    const miliseconds = '00';
+function addEvent() {
     // Checking that every filed is valid, description is optional
     if (
-        isValidHourRange(startHour, endHour) &&
-        isValidMinuteField(startMinutes) &&
-        isValidMinuteField(endMinutes) &&
-        isValidTitle(title) &&
-        isValidDate(date)
+        isValidHourRange(vars.startHour.value, vars.endHour.value) &&
+        isValidMinuteField(vars.startMinutes.value) &&
+        isValidMinuteField(vars.endMinutes.value) &&
+        isValidTitle(vars.title.value) &&
+        isValidDate(vars.date.value)
     ) {
         const event = {
-            title: title,
-            description: document.querySelector('#event-description')
-                .value,
-            date: date,
-            start_time: startHour + hourSeparator + startMinutes + hourSeparator + miliseconds,
-            end_time: endHour + hourSeparator + endMinutes + hourSeparator + miliseconds
+            title: vars.title,
+            description: vars.description,
+            date: vars.date,
+            start_time: vars.startHour + vars.hourSeparator + vars.startMinutes + vars.hourSeparator + vars.miliseconds,
+            end_time: vars.endHour + vars.hourSeparator + vars.endMinutes + vars.hourSeparator + vars.miliseconds
         };
         ipcRenderer.send('event:add', event);
     } else {
@@ -81,5 +69,6 @@ module.exports = {
   isValidDate,
   isValidHourRange,
   isValidMinuteField,
-  isValidTitle
+  isValidTitle,
+  addEvent
 }

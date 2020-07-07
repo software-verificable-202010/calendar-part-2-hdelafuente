@@ -1,15 +1,9 @@
-const api = require("./db/db");
-
-let loginForm = document.querySelector("form");
-loginForm.addEventListener("submit", (e) => { doLogin(e) });
-
-function doLogin(e) {
-  e.preventDefault();
-  let userNameText = document.querySelector("#username-text").value;
-  if (userNameText === null) {
+const api = require('./db/db');
+function doLogin(userNameField) {
+  if (userNameField.value === null) {
     return 1;
   }
-  api.login(userNameText);
+  api.login(userNameField.value);
   return 0;
 }
 
