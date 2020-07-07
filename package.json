@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/software-verificable-202010/calendar-part-2-hdelafuente#readme",
   "dependencies": {
-    "electron": "^8.2.0",
+    "electron": "^8.2.4",
     "istanbul": "^0.4.5",
     "jest": "^26.1.0",
     "js-datepicker": "^5.11.0",
